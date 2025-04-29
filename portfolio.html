@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vraj Patel - AI & Full Stack Developer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #FFD8A8;
+            --background-dark: #2E294E;
+            --card-bg: #4A4453;
+            --accent-1: #FF8E6E;
+            --accent-2: #E58B8B;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-dark);
+            color: #F8F9FA;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            backdrop-filter: blur(10px);
+            background: rgba(46, 41, 78, 0.95) !important;
+        }
+
+        .nav-link {
+            color: var(--secondary-color) !important;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.9) 0%, rgba(46, 41, 78, 0.9) 100%),
+                        url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            text-align: center;
+        }
+
+        .project-card {
+            background: var(--card-bg) !important;
+            border-radius: 15px !important;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 107, 107, 0.2);
+        }
+
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 4rem;
+            position: relative;
+            display: inline-block;
+            color: var(--primary-color);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .tech-item {
+            background: rgba(255, 107, 107, 0.15);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .tech-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .project-impact {
+            border-left: 3px solid var(--primary-color);
+            padding-left: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .skill-card {
+            background: var(--card-bg) !important;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-light {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#" style="color: var(--primary-color)">VRAJ PATEL</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#projects">Projects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#skills">Skills</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container text-center">
+            <h1 class="text-white mb-4">Computer Science Graduate</h1>
+            <p class="lead fs-4" style="color: var(--secondary-color)">Building intelligent solutions at the golden hour of technology</p>
+            <div class="mt-5">
+                <a href="#projects" class="btn btn-lg btn-primary mx-2 px-4 py-3">View Work</a>
+                <a href="#contact" class="btn btn-lg btn-outline-light mx-2 px-4 py-3">Contact Me</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-5" style="padding-top: 100px !important">
+        <div class="container">
+            <h2 class="section-title text-center">Featured Projects</h2>
+            
+            <!-- ADAPT Platform -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="project-card card h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="position-relative" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-project-diagram fa-3x position-absolute" 
+                                       style="color: var(--primary-color); left: 0; top: 0;"></i>
+                                    <i class="fas fa-wave-square fa-2x position-absolute" 
+                                       style="color: var(--accent-1); right: -5px; bottom: -5px; opacity: 0.8;"></i>
+                                </div>
+                                <h3 class="text-white mb-0 ms-3">ADAPT Data Platform</h3>
+                            </div>
+                            
+                            <div class="project-impact">
+                                <p class="text-white-50">Population ageing analysis toolkit with AI-powered insights:</p>
+                                <ul class="text-white-50">
+                                    <li>Used by Australian policymakers for demographic forecasting</li>
+                                    <li>Integrated 2016-2021 Census data with 40-year projections</li>
+                                    <li>Reduced policy research time by 65% through AI-driven insights</li>
+                                </ul>
+                            </div>
+
+                            <div class="tech-stack">
+                                <div class="tech-item">
+                                    <i class="fab fa-react fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">Next.js/React</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fas fa-database fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">Neo4j GraphDB</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fas fa-robot fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">Gemini AI</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fas fa-shield-alt fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">Clerk Auth</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-3 mt-4">
+                                <a href="https://adapt-mvp.vercel.app/home" 
+                                   class="btn btn-primary"
+                                   target="_blank"
+                                   rel="noopener">
+                                   <i class="fas fa-external-link-alt me-2"></i>Live Demo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FoodHub Project -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="project-card card h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-4">
+                                <i class="fas fa-utensils fa-3x" style="color: var(--primary-color)"></i>
+                                <h3 class="text-white mb-0 ms-3">FoodHub Ordering System</h3>
+                            </div>
+                            
+                            <div class="project-impact">
+                                <p class="text-white-50">Full-stack food delivery platform with dual interfaces:</p>
+                                <ul class="text-white-50">
+                                    <li>Customer-facing interface with restaurant filtering by ratings/distance</li>
+                                    <li>Merchant portal for order management and menu configuration</li>
+                                    <li>Integrated rating system and order tracking functionality</li>
+                                </ul>
+                            </div>
+
+                            <div class="tech-stack">
+                                <div class="tech-item">
+                                    <i class="fab fa-react fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">Next.js</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fab fa-css3-alt fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">Tailwind CSS</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fas fa-database fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">Supabase</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fab fa-github fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">GitHub CI/CD</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fas fa-flask fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">Jest Testing</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fas fa-rocket fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">Vercel</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-3 mt-4">
+                                <a href="http://hungr.vercel.app/login" 
+                                   class="btn btn-primary"
+                                   target="_blank"
+                                   rel="noopener">
+                                   <i class="fas fa-user me-2"></i>Customer Portal
+                                </a>
+                                <a href="http://merchant-foodhub.vercel.app/login" 
+                                   class="btn btn-primary"
+                                   target="_blank"
+                                   rel="noopener">
+                                   <i class="fas fa-store me-2"></i>Merchant Portal
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+			
+			 <!-- Done Daily Project -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="project-card card h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="position-relative" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-tasks fa-3x position-absolute" 
+                                       style="color: var(--primary-color); left: 0; top: 0;"></i>
+                                    <i class="fas fa-sort fa-2x position-absolute" 
+                                       style="color: var(--accent-1); right: -5px; bottom: -5px; opacity: 0.8;"></i>
+                                </div>
+                                <h3 class="text-white mb-0 ms-3">Done Daily Task Manager</h3>
+                            </div>
+                            
+                            <div class="project-impact">
+                                <p class="text-white-50">Intelligent task management system with simple yet helpful features:</p>
+                                <ul class="text-white-50">
+                                    <li>Priority-based task organisation with color coding</li>
+                                    <li>Drag-and-drop task reorganisation</li>
+                                    <li>Progress tracking with animated visualisations</li>
+                                    <li>Local storage persistence and theme switching</li>
+                                </ul>
+                            </div>
+
+                            <div class="tech-stack">
+                                <div class="tech-item">
+                                    <i class="fab fa-html5 fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">HTML5</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fab fa-css3-alt fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">CSS3</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fab fa-js-square fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">JavaScript</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fas fa-palette fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">Custom Theme Engine</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-3 mt-4">
+                                <a href="DoneDaily/donedaily.html" 
+                                   class="btn btn-primary"
+                                   target="_blank"
+                                   rel="noopener">
+                                   <i class="fas fa-external-link-alt me-2"></i>Live Demo
+                                </a>               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Projects -->
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="project-card card h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-4">
+                                <i class="fas fa-paw fa-2x" style="color: var(--primary-color)"></i>
+                                <h3 class="text-white mb-0 ms-3">Dog Breed Classifier</h3>
+                            </div>
+                            <p class="text-white-50">Deep learning model achieving 85% accuracy in identifying dog breeds using CNNs.</p>
+                            
+                            <div class="tech-stack">
+                                <div class="tech-item">
+                                    <i class="fab fa-python fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">Python</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fas fa-brain fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">TensorFlow</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quantum Snake Game -->
+                <div class="col-md-6">
+                    <div class="project-card card h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-4">
+                                <i class="fas fa-gamepad fa-2x" style="color: var(--primary-color)"></i>
+                                <h3 class="text-white mb-0 ms-3">Quantum Snake</h3>
+                            </div>
+                            <p class="text-white-50">Modern twist on classic Snake with quantum mechanics elements:</p>
+                            <ul class="text-white-50">
+                                <li>Time warp abilities and portal systems</li>
+                                <li>Dynamic difficulty scaling</li>
+                                <li>Particle effects and neon visual styling</li>
+                                <li>Local storage for high scores</li>
+                            </ul>
+
+                            <div class="tech-stack">
+                                <div class="tech-item">
+                                    <i class="fab fa-html5 fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">HTML5</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fab fa-css3-alt fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">CSS3</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fab fa-js-square fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">JavaScript</div>
+                                </div>
+                                <div class="tech-item">
+                                    <i class="fas fa-project-diagram fa-2x mb-2" style="color: var(--primary-color)"></i>
+                                    <div class="text-white">Canvas API</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-3 mt-4">
+                                <a href="quantumsnake2.html" 
+                                   class="btn btn-primary"
+                                   target="_blank"
+                                   rel="noopener">
+                                   <i class="fas fa-play me-2"></i>Play Game
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="py-5" style="background: var(--card-bg)">
+        <div class="container">
+            <h2 class="section-title text-center">Technical Expertise</h2>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="skill-card p-4 h-100">
+                        <h4 class="text-white mb-4"><i class="fas fa-code me-2"></i>Full Stack Development</h4>
+                        <ul class="list-unstyled text-white-50">
+                            <li class="mb-3">• Next.js Architecture</li>
+                            <li class="mb-3">• React Component Design</li>
+                            <li class="mb-3">• REST API Development</li>
+                            <li class="mb-3">• Tailwind CSS Styling</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="skill-card p-4 h-100">
+                        <h4 class="text-white mb-4"><i class="fas fa-brain me-2"></i>AI/ML Engineering</h4>
+                        <ul class="list-unstyled text-white-50">
+                            <li class="mb-3">• Generative AI Integration</li>
+                            <li class="mb-3">• Computer Vision Systems</li>
+                            <li class="mb-3">• Predictive Modeling</li>
+                            <li class="mb-3">• Data Correlation Analysis</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="skill-card p-4 h-100">
+                        <h4 class="text-white mb-4"><i class="fas fa-tools me-2"></i>DevOps & Databases</h4>
+                        <ul class="list-unstyled text-white-50">
+                            <li class="mb-3">• Neo4j Optimization</li>
+                            <li class="mb-3">• Vercel Deployment</li>
+                            <li class="mb-3">• CI/CD Pipelines</li>
+                            <li class="mb-3">• Data Validation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-5" style="background: var(--background-dark)">
+        <div class="container text-center">
+            <h2 class="section-title mb-5">Let's Connect</h2>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="contact-card p-4 rounded" style="background: var(--card-bg)">
+                        <p class="text-white mb-4">
+                            <i class="fas fa-envelope me-2" style="color: var(--primary-color)"></i>vraj04p@gmail.com<br>
+                            <i class="fas fa-phone me-2" style="color: var(--primary-color)"></i>0490 488 723
+                        </p>
+                        <a href="https://www.linkedin.com/in/vraj-patel-644597257/" 
+                           class="btn btn-primary"
+                           target="_blank"
+                           rel="noopener">
+                           <i class="fab fa-linkedin me-2"></i>LinkedIn Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Modal -->
+    <div class="modal fade" id="architectureModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content" style="background: var(--card-bg)">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" style="color: var(--primary-color)">ADAPT System Architecture</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="architecture-diagram.png" class="img-fluid" alt="ADAPT System Architecture">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

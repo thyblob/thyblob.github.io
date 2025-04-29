@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Done Daily</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #FFD8A8;
+            --background-dark: #2E294E;
+            --card-bg: #4A4453;
+            --accent-1: #FF8E6E;
+            --text-light: #F8F9FA;
+            --priority-low: #4CAF50;
+            --priority-medium: #FFC107;
+            --priority-high: #F44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--background-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            transition: background 0.3s ease;
+        }
+
+        body.light-theme {
+            --background-dark: #f0f0f0;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text-light: #2E294E;
+            --secondary-color: #2E294E;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-color);
+            margin: 0 auto 1rem;
+            position: relative;
+            transform: rotate(45deg);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .logo::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            color: var(--text-light);
+            font-size: 1.8rem;
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .input-container {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        #todoInput {
+            width: 100%;
+            padding: 1.2rem 1.5rem;
+            border: none;
+            border-radius: 15px;
+            background: var(--card-bg);
+            font-size: 1rem;
+            padding-left: 3rem;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 107, 107, 0.2);
+        }
+
+        #todoInput:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.3);
+        }
+
+        .add-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            pointer-events: none;
+        }
+
+        #addButton {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-color);
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 12px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #addButton:hover {
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        #clearCompleted {
+            background: rgba(255, 107, 107, 0.2);
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 12px;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        #clearCompleted:hover {
+            background: var(--primary-color);
+            color: var(--text-light);
+        }
+
+        .todo-list {
+            list-style: none;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 1.2rem;
+            background: var(--card-bg);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            cursor: move;
+            position: relative;
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .todo-item.priority-low {
+            border-left-color: var(--priority-low);
+        }
+
+        .todo-item.priority-medium {
+            border-left-color: var(--priority-medium);
+        }
+
+        .todo-item.priority-high {
+            border-left-color: var(--priority-high);
+        }
+
+        .todo-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.98);
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .todo-item.over-above {
+            border-top: 2px solid var(--primary-color);
+        }
+
+        .todo-item.over-below {
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .todo-item.completed {
+            opacity: 0.7;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+        }
+
+        .todo-text {
+            flex: 1;
+            margin: 0 1.5rem;
+            color: var(--text-light);
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .check-btn, .delete-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .check-btn {
+            background: var(--primary-color);
+            color: var(--text-light);
+        }
+
+        .delete-btn {
+            background: #f56565;
+            color: var(--text-light);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            flex: 1;
+            margin-right: 1rem;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-1));
+            width: 0;
+            transition: width 0.5s ease;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: transparent;
+            border: none;
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .date-picker-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .date-picker-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .date-picker-content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            max-width: 350px;
+            width: 90%;
+        }
+
+        .priority-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .priority-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.1);
+            min-width: 80px;
+        }
+
+        .priority-btn.selected {
+            transform: scale(0.95);
+            border-color: var(--text-light);
+        }
+
+        .priority-btn[data-priority="none"] {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .priority-low {
+            border-color: var(--priority-low);
+            color: var(--priority-low);
+        }
+
+        .priority-medium {
+            border-color: var(--priority-medium);
+            color: var(--priority-medium);
+        }
+
+        .priority-high {
+            border-color: var(--priority-high);
+            color: var(--priority-high);
+        }
+
+        .datetime-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .datetime-inputs input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            border-radius: 12px;
+            background: var(--card-bg);
+            color: var(--text-light);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .datetime-inputs input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-btn {
+            background: var(--primary-color);
+            color: var(--text-light);
+        }
+
+        .cancel-btn {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--primary-color);
+        }
+
+        .due-date-badge {
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            background: rgba(255, 107, 107, 0.1);
+            padding: 0.3rem 0.7rem;
+            border-radius: 12px;
+            margin-left: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .due-date-badge i {
+            font-size: 0.9rem;
+        }
+
+        .calendar-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); }
+            100% { transform: translateY(100vh) rotate(720deg); }
+        }
+
+        @keyframes firework {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color);
+            pointer-events: none;
+            animation: confetti-fall 2s linear forwards;
+        }
+
+        .firework {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: firework 1s ease-out forwards;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="date-picker-modal" id="datePickerModal">
+        <div class="date-picker-content">
+            <h3>Task Settings</h3>
+            <div class="priority-selector" id="prioritySelector">
+                <button class="priority-btn" data-priority="none">None</button>
+                <button class="priority-btn priority-low" data-priority="low">Low</button>
+                <button class="priority-btn priority-medium" data-priority="medium">Medium</button>
+                <button class="priority-btn priority-high" data-priority="high">High</button>
+            </div>
+            <div class="datetime-inputs">
+                <input type="date" id="taskDate">
+                <input type="time" id="taskTime">
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel-btn" id="cancelDate">Cancel</button>
+                <button class="modal-btn confirm-btn" id="clearDate">Clear All</button>
+                <button class="modal-btn confirm-btn" id="saveDate">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="logo"></div>
+            <h1>Done Daily</h1>
+            <div class="controls">
+                <div class="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                <button id="clearCompleted">Clear Completed</button>
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <i class="fas fa-plus add-icon"></i>
+            <input type="text" id="todoInput" placeholder="What needs to be done?">
+            <button id="addButton">Add</button>
+        </div>
+
+        <ul class="todo-list" id="todoList"></ul>
+
+        <div class="empty-state" id="emptyState">
+            <i class="fas fa-check-double float"></i>
+            <p>All tasks completed! Great work! 🎉</p>
+        </div>
+    </div>
+
+    <script>
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        let dragStartIndex;
+        let currentEditingIndex = null;
+
+        const todoInput = document.getElementById('todoInput');
+        const addButton = document.getElementById('addButton');
+        const todoList = document.getElementById('todoList');
+        const emptyState = document.getElementById('emptyState');
+        const progress = document.getElementById('progress');
+        const themeToggle = document.getElementById('themeToggle');
+        const datePickerModal = document.getElementById('datePickerModal');
+        const taskDateInput = document.getElementById('taskDate');
+        const taskTimeInput = document.getElementById('taskTime');
+        const saveDateBtn = document.getElementById('saveDate');
+        const cancelDateBtn = document.getElementById('cancelDate');
+
+        function init() {
+            renderTodos();
+            updateProgress();
+            updateEmptyState();
+            loadTheme();
+        }
+
+        function renderTodos() {
+            todoList.innerHTML = '';
+            todos.forEach((todo, index) => {
+                const todoItem = document.createElement('li');
+                const priorityClass = todo.priority ? `priority-${todo.priority}` : '';
+                todoItem.className = `todo-item ${todo.completed ? 'completed' : ''} ${priorityClass}`;
+                todoItem.draggable = true;
+                todoItem.innerHTML = `
+                    <button class="check-btn">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <span class="todo-text">${todo.text}</span>
+                    ${todo.dueDate ? `
+                        <span class="due-date-badge" data-index="${index}">
+                            <i class="fas fa-clock"></i>
+                            ${formatDateTime(todo.dueDate)}
+                        </span>
+                    ` : ''}
+                    <div class="actions">
+                        <button class="calendar-btn" data-index="${index}">
+                            <i class="fas fa-calendar-plus"></i>
+                        </button>
+                        <button class="delete-btn">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+
+                todoItem.querySelector('.check-btn').addEventListener('click', () => toggleTodo(index));
+                todoItem.querySelector('.delete-btn').addEventListener('click', () => deleteTodo(index));
+                todoItem.querySelector('.calendar-btn').addEventListener('click', (e) => {
+                    currentEditingIndex = e.currentTarget.dataset.index;
+                    showDatePicker(todos[currentEditingIndex]);
+                });
+
+                todoItem.addEventListener('dragstart', (e) => {
+                    dragStart(index);
+                    e.currentTarget.classList.add('dragging');
+                });
+
+                todoItem.addEventListener('dragend', (e) => {
+                    e.currentTarget.classList.remove('dragging');
+                });
+
+                todoItem.addEventListener('dragover', handleDragOver);
+                todoItem.addEventListener('drop', (e) => handleDrop(index));
+
+                todoList.appendChild(todoItem);
+            });
+        }
+
+        function addTodo() {
+            const text = todoInput.value.trim();
+            if (text) {
+                todos.push({ 
+                    text, 
+                    completed: false,
+                    dueDate: null,
+                    priority: null
+                });
+                todoInput.value = '';
+                saveTodos();
+                init();
+            }
+        }
+
+        function toggleTodo(index) {
+            todos[index].completed = !todos[index].completed;
+            saveTodos();
+            init();
+            
+            if(todos[index].completed) {
+                animateConfetti();
+                if(todos.every(todo => todo.completed)) {
+                    animateFireworks();
+                }
+            }
+        }
+
+        function deleteTodo(index) {
+            todos.splice(index, 1);
+            saveTodos();
+            init();
+        }
+
+        function clearCompletedTasks() {
+            todos = todos.filter(todo => !todo.completed);
+            saveTodos();
+            init();
+        }
+
+        function dragStart(index) {
+            dragStartIndex = index;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            const targetItem = e.target.closest('.todo-item');
+            if (targetItem) {
+                const todosElements = Array.from(todoList.children);
+                todosElements.forEach(item => {
+                    item.classList.remove('over-above', 'over-below');
+                });
+
+                const rect = targetItem.getBoundingClientRect();
+                const offsetY = e.clientY - rect.top;
+                const middle = rect.height / 2;
+
+                if (offsetY < middle) {
+                    targetItem.classList.add('over-above');
+                } else {
+                    targetItem.classList.add('over-below');
+                }
+            }
+        }
+
+        function handleDrop(dropIndex) {
+            const targetItem = todoList.children[dropIndex];
+            const isAbove = targetItem.classList.contains('over-above');
+            const isBelow = targetItem.classList.contains('over-below');
+
+            let newIndex = dropIndex;
+            if (isBelow) newIndex = dropIndex + 1;
+            if (newIndex > dragStartIndex) newIndex--;
+
+            const draggedItem = todos[dragStartIndex];
+            todos.splice(dragStartIndex, 1);
+            todos.splice(newIndex, 0, draggedItem);
+            
+            saveTodos();
+            init();
+
+            Array.from(todoList.children).forEach(item => {
+                item.classList.remove('over-above', 'over-below');
+            });
+        }
+
+        function updateProgress() {
+            const completed = todos.filter(todo => todo.completed).length;
+            const progressWidth = todos.length ? (completed / todos.length) * 100 : 0;
+            progress.style.width = `${progressWidth}%`;
+        }
+
+        function updateEmptyState() {
+            emptyState.style.display = todos.length ? 'none' : 'block';
+        }
+
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const isDark = !document.body.classList.contains('light-theme');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            themeToggle.innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.classList.toggle('light-theme', savedTheme === 'light');
+            themeToggle.innerHTML = savedTheme === 'dark' ? 
+                '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+        }
+
+        function showDatePicker(todo = null) {
+            const priorityBtns = document.querySelectorAll('.priority-btn');
+            priorityBtns.forEach(btn => {
+                btn.classList.remove('selected');
+                const todoPriority = todo?.priority || 'none';
+                if(btn.dataset.priority === todoPriority) {
+                    btn.classList.add('selected');
+                }
+            });
+
+            if (todo?.dueDate) {
+                const date = new Date(todo.dueDate);
+                taskDateInput.value = date.toISOString().split('T')[0];
+                taskTimeInput.value = date.toTimeString().substring(0,5);
+            } else {
+                taskDateInput.value = '';
+                taskTimeInput.value = '';
+            }
+            datePickerModal.classList.add('active');
+        }
+
+        function hideDatePicker() {
+            datePickerModal.classList.remove('active');
+        }
+
+        function saveDueDate() {
+            if (currentEditingIndex === null) return;
+            
+            const selectedPriority = document.querySelector('.priority-btn.selected')?.dataset.priority || null;
+            let dueDate = null;
+            
+            if (taskDateInput.value && taskTimeInput.value) {
+                const dateString = `${taskDateInput.value}T${taskTimeInput.value}`;
+                dueDate = new Date(dateString).toISOString();
+            }
+            
+            todos[currentEditingIndex].priority = selectedPriority === 'none' ? null : selectedPriority;
+            todos[currentEditingIndex].dueDate = dueDate;
+            saveTodos();
+            init();
+            hideDatePicker();
+        }
+
+        function formatDateTime(isoString) {
+            const date = new Date(isoString);
+            return `${date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+            })} ${date.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit'
+            })}`;
+        }
+
+        function animateConfetti() {
+            const colors = [getComputedStyle(document.documentElement).getPropertyValue('--primary-color'), 
+                          getComputedStyle(document.documentElement).getPropertyValue('--secondary-color'), 
+                          getComputedStyle(document.documentElement).getPropertyValue('--accent-1')];
+            
+            for(let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 2000);
+            }
+        }
+
+        function animateFireworks() {
+            const colors = [getComputedStyle(document.documentElement).getPropertyValue('--primary-color'), 
+                          getComputedStyle(document.documentElement).getPropertyValue('--secondary-color'), 
+                          getComputedStyle(document.documentElement).getPropertyValue('--accent-1')];
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            for(let i = 0; i < 100; i++) {
+                const firework = document.createElement('div');
+                firework.className = 'firework';
+                firework.style.left = centerX + 'px';
+                firework.style.top = centerY + 'px';
+                firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 3 + Math.random() * 5;
+                const dx = Math.cos(angle) * velocity;
+                const dy = Math.sin(angle) * velocity;
+                
+                firework.style.transform = `translate(${dx}px, ${dy}px)`;
+                document.body.appendChild(firework);
+                
+                setTimeout(() => firework.remove(), 1000);
+            }
+        }
+
+        // Event Listeners
+        addButton.addEventListener('click', addTodo);
+        todoInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTodo();
+        });
+        themeToggle.addEventListener('click', toggleTheme);
+        document.getElementById('clearCompleted').addEventListener('click', clearCompletedTasks);
+        saveDateBtn.addEventListener('click', saveDueDate);
+        cancelDateBtn.addEventListener('click', hideDatePicker);
+        datePickerModal.addEventListener('click', (e) => {
+            if (e.target === datePickerModal) hideDatePicker();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') hideDatePicker();
+        });
+
+        // Priority selector handling
+        document.querySelectorAll('.priority-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // Clear all settings
+        document.getElementById('clearDate').addEventListener('click', () => {
+            taskDateInput.value = '';
+            taskTimeInput.value = '';
+            document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelector('[data-priority="none"]').classList.add('selected');
+        });
+
+        init();
+
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pop {
+                0% { transform: scale(1); opacity: 1; }
+                100% { transform: scale(3); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
