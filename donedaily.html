@@ -357,6 +357,13 @@
             border-color: var(--priority-high);
             color: var(--priority-high);
         }
+		
+		 /* make heading, clock & calendar icons use primary color */
+        .date-picker-content h3,
+        .due-date-badge i,
+        .calendar-btn i {
+            color: var(--primary-color);
+        }
 
         .datetime-inputs {
             display: flex;
@@ -468,6 +475,9 @@
     </style>
 </head>
 <body>
+	<audio id="fireworkSound" src="https://assets.mixkit.co/active_storage/sfx/2999/2999-preview.mp3"></audio>
+    <audio id="confettiSound" src="https://assets.mixkit.co/active_storage/sfx/2997/2997-preview.mp3"></audio>
+
     <div class="date-picker-modal" id="datePickerModal">
         <div class="date-picker-content">
             <h3>Task Settings</h3>
