@@ -472,6 +472,18 @@
             animation: firework 1s ease-out forwards;
             z-index: 999;
         }
+		
+        .todo-edit-input {
+            flex: 1;
+            margin: 0 1.5rem;
+            padding: 0.5rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-light);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -580,6 +592,10 @@
                     </div>
                 `;
 
+                // Add double-click handler for editing
+                const todoText = todoItem.querySelector('.todo-text');
+                todoText.addEventListener('dblclick', () => enableEditMode(index, todoText));
+
                 todoItem.querySelector('.check-btn').addEventListener('click', () => toggleTodo(index));
                 todoItem.querySelector('.delete-btn').addEventListener('click', () => deleteTodo(index));
                 todoItem.querySelector('.calendar-btn').addEventListener('click', (e) => {
@@ -601,6 +617,36 @@
 
                 todoList.appendChild(todoItem);
             });
+        }
+		
+		//Enable edit mode
+		function enableEditMode(index, textElement) {
+            const input = document.createElement('input');
+            input.className = 'todo-edit-input';
+            input.value = todos[index].text;
+            
+            // Replace text with input
+            textElement.replaceWith(input);
+            input.focus();
+
+            // Save on enter or blur
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveEdit(index, input);
+            });
+            
+            input.addEventListener('blur', () => saveEdit(index, input));
+        }
+
+        //Save edited text
+        function saveEdit(index, input) {
+            const newText = input.value.trim();
+            if (newText && newText !== todos[index].text) {
+                todos[index].text = newText;
+                saveTodos();
+                init();
+            } else {
+                init(); // Revert if empty or unchanged
+            }
         }
 
         function addTodo() {
@@ -748,8 +794,11 @@
             const selectedPriority = document.querySelector('.priority-btn.selected')?.dataset.priority || null;
             let dueDate = null;
             
-            if (taskDateInput.value && taskTimeInput.value) {
-                const dateString = `${taskDateInput.value}T${taskTimeInput.value}`;
+            // CHANGED: Time is now optional
+            if (taskDateInput.value) {
+                // Use the time if provided, otherwise default to 00:00
+                const time = taskTimeInput.value || '00:00';
+                const dateString = `${taskDateInput.value}T${time}`;
                 dueDate = new Date(dateString).toISOString();
             }
             
@@ -762,13 +811,21 @@
 
         function formatDateTime(isoString) {
             const date = new Date(isoString);
-            return `${date.toLocaleDateString('en-US', { 
+            const dateOptions = { 
                 month: 'short', 
                 day: 'numeric' 
-            })} ${date.toLocaleTimeString('en-US', {
+            };
+            const timeOptions = {
                 hour: 'numeric',
                 minute: '2-digit'
-            })}`;
+            };
+            
+            // CHANGED: Only show time if not midnight
+            const showTime = date.getHours() !== 0 || date.getMinutes() !== 0;
+            
+            return `${date.toLocaleDateString('en-US', dateOptions)}${
+                showTime ? ` ${date.toLocaleTimeString('en-US', timeOptions)}` : ''
+            }`;
         }
 
         function animateConfetti() {
