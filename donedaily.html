@@ -40,7 +40,6 @@
             --card-bg: rgba(255, 255, 255, 0.9);
             --text-light: #2E294E;
             --secondary-color: #2E294E;
-			--primary-color: #2E294E;
         }
 
         .container {
@@ -478,7 +477,20 @@
             flex: 1;
             margin: 0 1.5rem;
             padding: 0.5rem;
-            border: 2px solid var(--primary-color) !important;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-light);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+        }
+		
+		/* Add edit input styles at the end of the style section */
+        .todo-edit-input {
+            flex: 1;
+            margin: 0 1.5rem;
+            padding: 0.5rem;
+            border: 2px solid var(--primary-color);
             border-radius: 8px;
             background: var(--card-bg);
             color: var(--text-light);
@@ -486,18 +498,17 @@
             font-size: 1rem;
         }
 
-		/* Priority border colors */
-		.todo-edit-input.priority-low {
-			border-color: var(--priority-low) !important;
-		}
+        .todo-item.priority-low .todo-edit-input {
+            border-color: var(--priority-low);
+        }
 
-		.todo-edit-input.priority-medium {
-			border-color: var(--priority-medium) !important;
-		}
+        .todo-item.priority-medium .todo-edit-input {
+            border-color: var(--priority-medium);
+        }
 
-		.todo-edit-input.priority-high {
-			border-color: var(--priority-high) !important;
-		}
+        .todo-item.priority-high .todo-edit-input {
+            border-color: var(--priority-high);
+        }
     </style>
 </head>
 <body>
@@ -635,32 +646,21 @@
 		
 		//Enable edit mode
 		function enableEditMode(index, textElement) {
-			const input = document.createElement('input');
-			input.className = 'todo-edit-input';
-			input.value = todos[index].text;
-			
-			// Get priority from parent item
-			const todoItem = textElement.closest('.todo-item');
-			const priorityClass = Array.from(todoItem.classList).find(c => 
-				c.startsWith('priority-')
-			);
-			
-			// Add priority class to input
-			if (priorityClass) {
-				input.classList.add(priorityClass);
-			}
+            const input = document.createElement('input');
+            input.className = 'todo-edit-input';
+            input.value = todos[index].text;
+            
+            // Replace text with input
+            textElement.replaceWith(input);
+            input.focus();
 
-			// Replace text with input
-			textElement.replaceWith(input);
-			input.focus();
-
-			// Save on enter or blur
-			input.addEventListener('keypress', (e) => {
-				if (e.key === 'Enter') saveEdit(index, input);
-			});
-			
-			input.addEventListener('blur', () => saveEdit(index, input));
-		}
+            // Save on enter or blur
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveEdit(index, input);
+            });
+            
+            input.addEventListener('blur', () => saveEdit(index, input));
+        }
 
         //Save edited text
         function saveEdit(index, input) {
