@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Pong RPG - Difficulty Levels</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            background-color: #0f0f1a;
+            border: 8px solid #4a2c15;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.5);
+            image-rendering: pixelated;
+            max-width: 100%;
+        }
+        
+        .pixel-border {
+            border: 4px solid #6b4a2d;
+            border-image: repeating-linear-gradient(45deg, #6b4a2d, #6b4a2d 2px, #4a2c15 2px, #4a2c15 4px) 8;
+            box-shadow: 0 0 0 4px #8b5a2d;
+        }
+        
+        .pixel-text {
+            text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+        
+        .pixel-button {
+            background: linear-gradient(to bottom, #8b5a2d, #6b4a2d);
+            border: 4px solid #4a2c15;
+            color: #f8d8b0;
+            text-shadow: 2px 2px 0 #4a2c15;
+            box-shadow: 0 4px 0 #4a2c15;
+            transition: all 0.1s;
+        }
+        
+        .pixel-button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #4a2c15;
+        }
+        
+        .health-bar {
+            height: 10px;
+            background: linear-gradient(to right, #ff0000, #ff4500);
+            border: 2px solid #4a2c15;
+            box-shadow: 0 0 5px rgba(255, 69, 0, 0.5);
+        }
+        
+        .mana-bar {
+            height: 10px;
+            background: linear-gradient(to right, #1e90ff, #00bfff);
+            border: 2px solid #4a2c15;
+            box-shadow: 0 0 5px rgba(30, 144, 255, 0.5);
+        }
+        
+        #startScreen, #gameOverScreen {
+            background-color: rgba(26, 26, 46, 0.9);
+            border: 8px solid #6b4a2d;
+        }
+        
+        .pixel-select {
+            background-color: #4a2c15;
+            color: #f8d8b0;
+            border: 4px solid #6b4a2d;
+            font-family: 'Press Start 2P', cursive;
+            padding: 8px;
+        }
+        
+        .pixel-select option {
+            background-color: #4a2c15;
+        }
+        
+        .power-up {
+            animation: pulse 1s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { opacity: 0.7; transform: scale(1); }
+            to { opacity: 1; transform: scale(1.1); }
+        }
+        
+        .damage-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 0, 0, 0.3);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        canvas {
+            touch-action: none;
+            user-select: none;
+        }
+        
+        .attack-bar {
+            height: 10px;
+            background: linear-gradient(to right, #FFD700, #FFA500);
+            border: 2px solid #4a2c15;
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        
+        #tauntDisplay {
+            text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+            white-space: nowrap;
+        }
+        
+        /* Controls guide styling */
+        .stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 20px;
+        }
+        
+        .stats-section {
+            background-color: rgba(42, 42, 78, 0.7);
+            border: 4px solid #6b4a2d;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+        }
+        
+        .controls-guide {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #6b4a2d;
+        }
+        
+        .control-row {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .key {
+            background: linear-gradient(to bottom, #8b5a2d, #6b4a2d);
+            border: 3px solid #4a2c15;
+            color: #f8d8b0;
+            padding: 5px 10px;
+            min-width: 80px;
+            text-align: center;
+            margin-right: 15px;
+            box-shadow: 0 3px 0 #4a2c15;
+            font-size: 12px;
+        }
+        
+        .action {
+            color: #f8d8b0;
+            flex-grow: 1;
+            font-size: 12px;
+        }
+        
+        .class-specific {
+            background-color: rgba(107, 74, 45, 0.3);
+            padding: 10px;
+            margin-top: 10px;
+            border-left: 4px solid #8b5a2d;
+        }
+        
+        .class-title {
+            color: #FF9800;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .scrollable-content {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 30px;
+        }
+        
+        .game-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .canvas-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .footer-note {
+            color: #6b7280;
+            font-size: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        /* New style for attack preview */
+        .attack-preview {
+            margin-top: 10px;
+            padding: 8px;
+            background-color: rgba(42, 42, 78, 0.7);
+            border: 2px solid #6b4a2d;
+            border-radius: 4px;
+        }
+        
+        /* Difficulty indicators */
+        .difficulty-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+        
+        .easy { background-color: #4CAF50; }
+        .intermediate { background-color: #FFC107; color: #000; }
+        .hard { background-color: #F44336; }
+        .extreme { background-color: #9C27B0; }
+    </style>
+</head>
+<body>
+    <div class="damage-effect" id="damageEffect"></div>
+    
+    <div class="container">
+        <div class="game-title">
+            <h1 class="text-3xl md:text-4xl text-yellow-300 pixel-text">PIXEL PONG RPG</h1>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="800" height="500" class="pixel-border"></canvas>
+            
+            <!-- Start Screen -->
+            <div id="startScreen" class="absolute inset-0 flex flex-col items-center justify-center gap-6 p-8 text-center">            
+                <p class="text-green-300 text-lg md:text-xl max-w-md pixel-text">Defeat the evil wizard by bouncing spells back at him!</p>
+                
+                <div class="flex flex-col gap-4 w-full max-w-xs">
+                    <label class="text-yellow-200 text-sm pixel-text">Choose Your Class:</label>
+                    <select id="characterSelect" class="pixel-select">
+                        <option value="knight">Knight (Slow but Strong)</option>
+                        <option value="mage">Mage (Protected but Fragile)</option>
+                        <option value="archer">Archer (Balanced)</option>
+                    </select>
+                    
+                    <div class="text-yellow-200 text-sm pixel-text">
+                        Class Stats: 
+                        <span id="previewHp">HP: 300</span> | 
+                        <span id="previewMp">MP: 50</span>
+                    </div>
+                    
+                    <label class="text-yellow-200 text-sm pixel-text mt-4">Select Difficulty:</label>
+                    <select id="difficultySelect" class="pixel-select">
+                        <option value="easy">Easy</option>
+                        <option value="intermediate" selected>Intermediate</option>
+                        <option value="hard">Hard</option>
+                        <option value="extreme">Extreme</option>
+                    </select>
+                    
+                    <div id="difficultyInfo" class="text-xs text-white mt-2 pixel-text">
+                        <div id="easyInfo" class="hidden">
+                            Wizard HP: 200<br>
+                            Ball Speed: Slow<br>
+                            Spell Frequency: Low
+                        </div>
+                        <div id="intermediateInfo" class="">
+                            Wizard HP: 300<br>
+                            Ball Speed: Normal<br>
+                            Spell Frequency: Medium
+                        </div>
+                        <div id="hardInfo" class="hidden">
+                            Wizard HP: 400<br>
+                            Ball Speed: Fast<br>
+                            Spell Frequency: High
+                        </div>
+                        <div id="extremeInfo" class="hidden">
+                            Wizard HP: 500<br>
+                            Ball Speed: Very Fast<br>
+                            Spell Frequency: Very High
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="startButton" class="pixel-button px-8 py-4 text-xl mt-4">START QUEST</button>
+            </div>
+            
+            <div id="gameControls" class="absolute top-4 right-4 flex gap-2 hidden">
+                <button id="pauseButton" class="pixel-button px-4 py-2 text-sm">PAUSE</button>
+                <button id="menuButton" class="pixel-button px-4 py-2 text-sm">MENU</button>
+            </div>
+            
+            <!-- Game Over Screen -->
+            <div id="gameOverScreen" class="absolute inset-0 flex flex-col items-center justify-center gap-8 p-8 text-center hidden">
+                <h2 class="text-3xl md:text-5xl text-red-500 pixel-text" id="gameOverTitle">GAME OVER</h2>
+                <p class="text-white text-lg md:text-xl max-w-md pixel-text" id="gameOverMessage">The wizard has defeated you!</p>
+                <div class="text-yellow-300 text-xl pixel-text" id="finalScore">Score: 0</div>
+                <div class="text-white text-sm pixel-text" id="difficultyAchieved">Difficulty: Intermediate</div>
+                <button id="restartButton" class="pixel-button px-8 py-4 text-xl">TRY AGAIN</button>
+            </div>
+        </div>
+        
+        <div class="scrollable-content">
+            <div class="stats-grid">
+                <div class="stats-section">
+                    <h3 class="text-yellow-300 text-center mb-3 pixel-text">HERO STATS</h3>
+                    <div class="mb-2">
+                        <div class="flex justify-between text-sm text-white mb-1 pixel-text">
+                            <span>HP:</span>
+                            <span id="playerHpText">
+                                <span id="currentHp">300</span>/<span id="maxHp">300</span>
+                            </span>
+                        </div>
+                        <div class="health-bar" id="playerHpBar"></div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="flex justify-between text-sm text-white mb-1 pixel-text">
+                            <span>MP:</span>
+                            <span id="playerMpText">
+                                <span id="currentMp">50</span>/<span id="maxMp">50</span>
+                            </span>
+                        </div>
+                        <div class="mana-bar" id="playerMpBar"></div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="flex justify-between text-sm text-white mb-1 pixel-text">
+                            <span>Attack:</span>
+                            <span id="attackCooldown">Ready</span>
+                        </div>
+                        <div class="attack-bar" id="attackCooldownBar"></div>
+                    </div>
+                    <div class="text-green-300 text-sm pixel-text">Score: <span id="scoreDisplay">0</span></div>
+                    
+                    <div class="controls-guide">
+                        <h4 class="text-blue-300 text-center mb-3 pixel-text">CONTROLS</h4>
+                        <div class="control-row">
+                            <div class="key pixel-text">MOUSE/TOUCH</div>
+                            <div class="action pixel-text">Move paddle</div>
+                        </div>
+                        <div class="control-row">
+                            <div class="key pixel-text">SPACE</div>
+                            <div class="action pixel-text">Activate shield</div>
+                        </div>
+                        <div class="control-row">
+                            <div class="key pixel-text">Z / CLICK</div>
+                            <div class="action pixel-text">Attack</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-section">
+                    <h3 class="text-red-300 text-center mb-3 pixel-text">WIZARD STATS</h3>
+                    <div class="mb-2">
+                        <div class="flex justify-between text-sm text-white mb-1 pixel-text">
+                            <span>HP:</span>
+                            <span id="enemyHpText">300/300</span>
+                        </div>
+                        <div class="health-bar" id="enemyHpBar"></div>
+                    </div>
+                    <div class="text-sm text-white mb-4 pixel-text">Difficulty: 
+                        <span id="difficultyDisplay">Intermediate</span>
+                        <span id="difficultyIndicator" class="difficulty-indicator intermediate">INTERMEDIATE</span>
+                    </div>
+                    
+                    <div class="class-specific">
+                        <div class="class-title pixel-text">CLASS ABILITIES:</div>
+                        <div class="pixel-text text-sm text-yellow-200">KNIGHT: Heavy melee attack</div>
+                        <div class="pixel-text text-sm text-purple-300">MAGE: Lightning bolt attack</div>
+                        <div class="pixel-text text-sm text-orange-300">ARCHER: Triple arrow shot</div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4 class="text-yellow-200 text-center mb-3 pixel-text">GAME TIPS</h4>
+                        <div class="text-xs text-yellow-200 pixel-text">
+                            <p>• Block spells with your shield (SPACE)</p>
+                            <p>• Return the ball to damage the wizard</p>
+                            <p>• Collect power-ups to boost abilities</p>
+                            <p>• Each class has unique strengths</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-section mt-4">
+                <h3 class="text-green-300 text-center mb-3 pixel-text">POWER-UPS & STATUS</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="flex flex-col items-center">
+                        <div class="w-6 h-6 rounded-full bg-[#FF5722] mb-1 border-2 border-[#4a2c15]"></div>
+                        <span class="text-xs text-white pixel-text">Health</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-6 h-6 rounded-full bg-[#2196F3] mb-1 border-2 border-[#4a2c15]"></div>
+                        <span class="text-xs text-white pixel-text">Mana</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-6 h-6 rounded-full bg-[#FFC107] mb-1 border-2 border-[#4a2c15]"></div>
+                        <span class="text-xs text-white pixel-text">Power</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-6 h-6 rounded-full bg-[#ff4500] mb-1 border-2 border-[#4a2c15]"></div>
+                        <span class="text-xs text-white pixel-text">Fire</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-note pixel-text">
+            Use MOUSE or TOUCH to move paddle | SPACE for shield | Z or CLICK to attack
+        </div>
+    </div>
+
+    <script>
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        // Game constants
+        const PADDLE_WIDTH = 15;
+        const PADDLE_HEIGHT = 100;
+        const BALL_SIZE = 12;
+        const INITIAL_BALL_SPEED = 5;
+        const MAX_BALL_SPEED = 15;
+        const PADDLE_SPEED = 8;
+        const POWERUP_SIZE = 20;
+        const PLAYER_PROJECTILE_SIZE = 8;
+        
+        // Attack constants
+        const KNIGHT_ATTACK_COOLDOWN = 1000; // 1 seconds
+        const ARCHER_ATTACK_COOLDOWN = 500; // 0.5 seconds
+        const KNIGHT_DAMAGE = 30;
+        const ARCHER_DAMAGE = 10;
+        const MAGE_ATTACK_COOLDOWN = 3000; // 3 seconds
+        const LIGHTNING_DAMAGE = 20;
+
+        // Status effects
+        const STATUS = {
+            FIRE: { duration: 3000, damage: 2, interval: 500, color: '#ff4500' },
+            ICE: { duration: 4000, speedMultiplier: 0.5, color: '#00ffff' },
+            POISON: { duration: 5000, mpDrain: 3, interval: 1000, color: '#7b19d9' }
+        };
+        
+        // Enemy taunts
+        const TAUNTS = [
+            "Foolish hero!",
+            "You cannot stop the arcane storm!",
+            "Your magic is weak!",
+            "The void consumes you!",
+            "Witness true power!"
+        ];
+        let currentTaunt = null;
+                
+        // Game variables
+        let canvas, ctx;
+        let gameRunning = false;
+        let animationId;
+        let score = 0;
+        let difficulty = 1;
+        let powerTimer = null;
+        
+        // Player stats
+        let player = {
+            x: 50,
+            y: 250,
+            width: PADDLE_WIDTH,
+            height: PADDLE_HEIGHT,
+            dy: 0,
+            color: '#4CAF50',
+            hp: 100,
+            maxHp: 100,
+            mp: 50,
+            maxMp: 50,
+            mpRegen: 0.1,
+            class: 'knight',
+            shieldActive: false,
+            shieldCost: 0.5,
+            lastHitTime: 0,
+            hitCooldown: 1000,
+            attackCooldown: KNIGHT_ATTACK_COOLDOWN,
+            lastAttackTime: 0,
+            canAttack: true,
+            statusEffects: [],
+            originalSpeed: PADDLE_SPEED
+        };
+        
+        // Enemy stats
+        let enemy = {
+            x: 735,
+            y: 250,
+            width: PADDLE_WIDTH,
+            height: PADDLE_HEIGHT,
+            dy: 0,
+            color: '#F44336',
+            hp: 300,
+            maxHp: 300,
+            spellCooldown: 0,
+            spellInterval: 2000,
+            lastSpellTime: 0
+        };
+        
+        // Ball properties
+        let ball = {
+            x: 400,
+            y: 250,
+            size: BALL_SIZE,
+            dx: INITIAL_BALL_SPEED,
+            dy: INITIAL_BALL_SPEED,
+            color: '#FFEB3B',
+            lastHitBy: null,
+            power: 1
+        };
+        
+        // Power-ups
+        let powerUps = [];
+        let powerUpTypes = [
+            { color: '#FF5722', type: 'health', value: 20 },
+            { color: '#2196F3', type: 'mana', value: 15 },
+            { color: '#FFC107', type: 'power', value: 2, duration: 10000 }
+        ];
+        
+        // Spells (enemy projectiles)
+        let spells = [];
+        
+        // Difficulty settings
+        const DIFFICULTY_SETTINGS = {
+            easy: {
+                wizardHp: 200,
+                spellInterval: 2500,
+                ballSpeed: 4,
+                maxBallSpeed: 12,
+                playerDamage: 5,
+                name: "Easy",
+                color: "easy"
+            },
+            intermediate: {
+                wizardHp: 300,
+                spellInterval: 2000,
+                ballSpeed: 5,
+                maxBallSpeed: 15,
+                playerDamage: 10,
+                name: "Intermediate",
+                color: "intermediate"
+            },
+            hard: {
+                wizardHp: 400,
+                spellInterval: 1500,
+                ballSpeed: 6,
+                maxBallSpeed: 18,
+                playerDamage: 15,
+                name: "Hard",
+                color: "hard"
+            },
+            extreme: {
+                wizardHp: 500,
+                spellInterval: 1000,
+                ballSpeed: 7,
+                maxBallSpeed: 20,
+                playerDamage: 20,
+                name: "Extreme",
+                color: "extreme"
+            }
+        };
+        
+        // Initialize game
+        function init() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Event listeners
+            document.addEventListener('mousemove', movePaddle);
+            document.addEventListener('touchmove', handleTouch);
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
+            
+            // New attack listeners
+            document.addEventListener('mousedown', handleAttack);
+            document.addEventListener('touchstart', handleAttack);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'z' || e.key === 'Z') handleAttack(e);
+            });
+            
+            // Add these event listeners in the init() function
+            document.getElementById('restartButton').addEventListener('click', startGame);
+            document.getElementById('pauseButton').addEventListener('click', togglePause);
+            document.getElementById('menuButton').addEventListener('click', returnToMenu);
+            
+            // Button listeners
+            document.getElementById('startButton').addEventListener('click', startGame);
+            document.getElementById('gameControls').classList.remove('hidden');
+            
+            // Character select listener
+            document.getElementById('characterSelect').addEventListener('change', updateClassPreview);
+            
+            // Difficulty select listener
+            document.getElementById('difficultySelect').addEventListener('change', updateDifficultyInfo);
+            
+            updateClassPreview();
+            updateDifficultyInfo();
+            
+            // Draw initial screen
+            drawStartScreen();
+        }
+        
+        let isPaused = false;
+        
+        function updateClassPreview() {
+            const characterSelect = document.getElementById('characterSelect');
+            const previewHp = document.getElementById('previewHp');
+            const previewMp = document.getElementById('previewMp');
+            const maxHpSpan = document.getElementById('maxHp');
+            const maxMpSpan = document.getElementById('maxMp');
+            const currentHpSpan = document.getElementById('currentHp');
+            const currentMpSpan = document.getElementById('currentMp');
+            const hpBar = document.getElementById('playerHpBar');
+            const mpBar = document.getElementById('playerMpBar');
+            
+            // Get attack preview element (create if doesn't exist)
+            let attackPreview = document.getElementById('attackPreview');
+            if (!attackPreview) {
+                attackPreview = document.createElement('div');
+                attackPreview.id = 'attackPreview';
+                attackPreview.className = 'attack-preview text-white text-sm pixel-text';
+                document.querySelector('.flex.flex-col.gap-4.w-full.max-w-xs').appendChild(attackPreview);
+            }
+
+            switch(characterSelect.value) {
+                case 'knight':
+                    previewHp.textContent = 'HP: 300/300';
+                    previewMp.textContent = 'MP: 50/50';
+                    maxHpSpan.textContent = '300';
+                    maxMpSpan.textContent = '50';
+                    currentHpSpan.textContent = '300';
+                    currentMpSpan.textContent = '50';
+                    hpBar.style.width = '100%';
+                    mpBar.style.width = '100%';
+                    // Attack preview
+                    attackPreview.innerHTML = `
+                        <div class="flex justify-between mb-1">
+                            <span>Attack Cooldown:</span>
+                            <span>1.0s</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5">
+                            <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                        <div class="mt-1 text-yellow-300">Heavy Melee Attack (${KNIGHT_DAMAGE} dmg)</div>
+                    `;
+                    break;
+                case 'mage':
+                    previewHp.textContent = 'HP: 50/50';
+                    previewMp.textContent = 'MP: ∞/∞';
+                    maxHpSpan.textContent = '50';
+                    maxMpSpan.textContent = '∞';
+                    currentHpSpan.textContent = '50';
+                    currentMpSpan.textContent = '∞';
+                    hpBar.style.width = '100%';
+                    mpBar.style.width = '100%';
+                    // Attack preview
+                    attackPreview.innerHTML = `
+                        <div class="flex justify-between mb-1">
+                            <span>Attack Cooldown:</span>
+                            <span>3.0s</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5">
+                            <div class="bg-purple-500 h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                        <div class="mt-1 text-purple-300">Lightning Bolt (${LIGHTNING_DAMAGE} dmg)</div>
+                    `;
+                    break;
+                case 'archer':
+                    previewHp.textContent = 'HP: 100/100';
+                    previewMp.textContent = 'MP: 100/100';
+                    maxHpSpan.textContent = '100';
+                    maxMpSpan.textContent = '100';
+                    currentHpSpan.textContent = '100';
+                    currentMpSpan.textContent = '100';
+                    hpBar.style.width = '100%';
+                    mpBar.style.width = '100%';
+                    // Attack preview
+                    attackPreview.innerHTML = `
+                        <div class="flex justify-between mb-1">
+                            <span>Attack Cooldown:</span>
+                            <span>0.5s</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5">
+                            <div class="bg-orange-500 h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                        <div class="mt-1 text-orange-300">Triple Arrow Shot (${ARCHER_DAMAGE} dmg each)</div>
+                    `;
+                    break;
+            }
+        }
+        
+        function updateDifficultyInfo() {
+            const difficultySelect = document.getElementById('difficultySelect');
+            const difficultyInfo = document.getElementById('difficultyInfo');
+            
+            // Hide all info divs
+            document.getElementById('easyInfo').classList.add('hidden');
+            document.getElementById('intermediateInfo').classList.add('hidden');
+            document.getElementById('hardInfo').classList.add('hidden');
+            document.getElementById('extremeInfo').classList.add('hidden');
+            
+            // Show selected difficulty info
+            document.getElementById(difficultySelect.value + 'Info').classList.remove('hidden');
+        }
+
+        
+        // Start game
+        function startGame() {
+            const difficultySelect = document.getElementById('difficultySelect');
+            const difficultySetting = DIFFICULTY_SETTINGS[difficultySelect.value];
+            
+            // Set difficulty display
+            document.getElementById('difficultyDisplay').textContent = difficultySetting.name;
+            document.getElementById('difficultyIndicator').textContent = difficultySetting.name.toUpperCase();
+            document.getElementById('difficultyIndicator').className = `difficulty-indicator ${difficultySetting.color}`;
+            
+            // Set enemy stats based on difficulty
+            enemy.maxHp = difficultySetting.wizardHp;
+            enemy.hp = enemy.maxHp;
+            enemy.spellInterval = difficultySetting.spellInterval;
+            
+            // Adjust ball speed based on difficulty
+            ball.dx = difficultySetting.ballSpeed;
+            ball.dy = difficultySetting.ballSpeed;
+            
+            // Set player class
+            const characterSelect = document.getElementById('characterSelect');
+            player.class = characterSelect.value;
+            
+            // Set class-specific attack properties
+            switch(player.class) {
+                case 'knight':
+                    player.maxHp = 300;
+                    player.hp = 300;
+                    player.maxMp = 50;
+                    player.mp = 50;
+                    player.mpRegen = 0.05;
+                    player.width = PADDLE_WIDTH + 5;
+                    player.height = PADDLE_HEIGHT + 20;
+                    player.color = '#4CAF50';
+                    player.attackCooldown = KNIGHT_ATTACK_COOLDOWN;
+                    player.canAttack = true;
+                    break;
+                case 'mage':
+                    player.maxHp = 50;
+                    player.hp = 50;
+                    player.maxMp = 9999;
+                    player.mp = 9999;
+                    player.mpRegen = 1;
+                    player.width = PADDLE_WIDTH - 3;
+                    player.height = PADDLE_HEIGHT - 20;
+                    player.color = '#9C27B0';
+                    player.shieldCost = 0.2;
+                    player.attackCooldown = MAGE_ATTACK_COOLDOWN;
+                    player.canAttack = true;
+                    break;
+                case 'archer':
+                    player.maxHp = 100;
+                    player.hp = 100;
+                    player.maxMp = 100;
+                    player.mp = 100;
+                    player.mpRegen = 0.1;
+                    player.width = PADDLE_WIDTH;
+                    player.height = PADDLE_HEIGHT;
+                    player.color = '#FF9800';
+                    player.attackCooldown = ARCHER_ATTACK_COOLDOWN;
+                    player.canAttack = true;
+                    break;
+            }
+            
+            document.getElementById('gameControls').classList.remove('hidden');
+
+            // Reset game state
+            score = 0;
+            difficulty = 1;
+            powerUps = [];
+            spells = [];
+            
+            // Reset ball
+            resetBall();
+            
+            // Hide start screen
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            
+            // Start game loop
+            gameRunning = true;
+            updateStats();
+            gameLoop();
+        }
+        
+        // Handle attacks
+        function handleAttack(e) {
+            if (!gameRunning || isPaused || !player.canAttack) return;
+            e.preventDefault();
+            
+            const now = Date.now();
+            if (now - player.lastAttackTime < player.attackCooldown) return;
+            player.lastAttackTime = now;
+
+            switch(player.class) {
+                case 'knight':
+                    spells.push({
+                        x: player.x + player.width,
+                        y: player.y + player.height/2 - 15,
+                        size: 30,
+                        dx: 6,
+                        dy: 0,
+                        color: '#FFD700',
+                        damage: KNIGHT_DAMAGE,
+                        owner: 'player'
+                    });
+                    break;
+                    
+                case 'mage':
+                    const targetY = enemy.y + enemy.height/2;
+                    const angle = Math.atan2(
+                        targetY - (player.y + player.height/2),
+                        enemy.x - player.x
+                    );
+                    
+                    spells.push({
+                        x: player.x + player.width,
+                        y: player.y + player.height/2 - 5,
+                        size: 8,
+                        dx: Math.cos(angle) * 25, // Very high speed
+                        dy: Math.sin(angle) * 25,
+                        color: '#00FFFF',
+                        damage: LIGHTNING_DAMAGE,
+                        owner: 'player',
+                        trail: [] // For lightning effect
+                    });
+                    break;
+                    
+                case 'archer':
+                    const centerY = player.y + player.height / 2;
+                    const angles = [-0.2, 0, 0.2];
+                    angles.forEach(offset => {
+                        const angle = Math.atan2((enemy.y + enemy.height / 2) - centerY, enemy.x - player.x) + offset;
+                        spells.push({
+                            x: player.x + player.width,
+                            y: centerY - 5,
+                            size: 10,
+                            dx: Math.cos(angle) * 10,
+                            dy: Math.sin(angle) * 10,
+                            color: '#ffffff',
+                            damage: ARCHER_DAMAGE,
+                            owner: 'player',
+                            type: 'arrow',
+                            angle: angle
+                        });
+                    });
+                    break;
+            }
+            playSound('attack');
+        }
+        
+        // Add these new functions
+        function togglePause() {
+            isPaused = !isPaused;
+            document.getElementById('pauseButton').textContent = isPaused ? 'RESUME' : 'PAUSE';
+            if (!isPaused) {
+                // Cancel any existing loop before starting new one
+                cancelAnimationFrame(animationId);
+                gameLoop();
+            }
+        }
+
+        // Update the returnToMenu() function
+        function returnToMenu() {
+            gameRunning = false;
+            isPaused = false;
+            document.getElementById('startScreen').classList.remove('hidden');
+            document.getElementById('gameControls').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+        }
+
+        // Game loop
+        function gameLoop() {
+            if (!gameRunning || isPaused) return;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Update game state
+            update();
+            
+            // Draw game elements
+            draw();
+            
+            // Continue animation loop
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+        // Update game state
+        function update() {
+            // Move player paddle
+            player.y += player.dy;
+            
+            // Keep player paddle in bounds
+            if (player.y < 0) player.y = 0;
+            if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
+            
+            // AI for enemy paddle (simple follow ball)
+            const enemyCenter = enemy.y + enemy.height / 2;
+            const ballCenter = ball.y + ball.size / 2;
+            
+            if (enemyCenter < ballCenter - 10) {
+                enemy.dy = PADDLE_SPEED * 0.7 * difficulty;
+            } else if (enemyCenter > ballCenter + 10) {
+                enemy.dy = -PADDLE_SPEED * 0.7 * difficulty;
+            } else {
+                enemy.dy = 0;
+            }
+            
+            // Move enemy paddle
+            enemy.y += enemy.dy;
+            
+            // Keep enemy paddle in bounds
+            if (enemy.y < 0) enemy.y = 0;
+            if (enemy.y + enemy.height > canvas.height) enemy.y = canvas.height - enemy.height;
+            
+            // Move ball
+            ball.x += ball.dx * ball.power;
+            ball.y += ball.dy * ball.power;
+            
+            // Ball collision with top and bottom walls
+            if (ball.y < 0 || ball.y + ball.size > canvas.height) {
+                ball.dy = -ball.dy;
+                playSound('wall');
+            }
+            
+            // Ball collision with player paddle
+            if (
+                ball.x < player.x + player.width &&
+                ball.x > player.x &&
+                ball.y + ball.size > player.y &&
+                ball.y < player.y + player.height
+            ) {
+                // Calculate angle based on where ball hits paddle
+                const hitPoint = (ball.y + ball.size / 2 - player.y) / player.height;
+                const angle = (hitPoint - 0.5) * Math.PI / 2; // -45 to 45 degrees
+                
+                // Calculate new direction
+                const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+                ball.dx = Math.cos(angle) * speed;
+                ball.dy = Math.sin(angle) * speed;
+                
+                // Ensure ball moves right
+                ball.dx = Math.abs(ball.dx);
+                
+                // Increase speed slightly
+                if (Math.abs(ball.dx) < MAX_BALL_SPEED) {
+                    ball.dx *= 1.05;
+                    ball.dy *= 1.05;
+                }
+                
+                ball.lastHitBy = 'player';
+                playSound('paddle');
+                
+                // If player has power boost, add extra power to the ball
+                if (ball.power > 1) {
+                    ball.dx *= 1.2;
+                    ball.dy *= 1.2;
+                }
+            }
+            
+            // Ball collision with enemy paddle
+            if (
+                ball.x + ball.size > enemy.x &&
+                ball.x + ball.size < enemy.x + enemy.width &&
+                ball.y + ball.size > enemy.y &&
+                ball.y < enemy.y + enemy.height
+            ) {
+                // Calculate angle based on where ball hits paddle
+                const hitPoint = (ball.y + ball.size / 2 - enemy.y) / enemy.height;
+                const angle = (hitPoint - 0.5) * Math.PI / 2; // -45 to 45 degrees
+                
+                // Calculate new direction
+                const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+                ball.dx = -Math.cos(angle) * speed;
+                ball.dy = Math.sin(angle) * speed;
+                
+                // Ensure ball moves left
+                ball.dx = -Math.abs(ball.dx);
+                
+                // Increase speed slightly
+                if (Math.abs(ball.dx) < MAX_BALL_SPEED) {
+                    ball.dx *= 1.05;
+                    ball.dy *= 1.05;
+                }
+                
+                ball.lastHitBy = 'enemy';
+                playSound('paddle');
+            }
+            
+            updateStatusEffects();
+            
+            // Ball out of bounds - left side (player loses HP)
+            if (ball.x + ball.size < 0) {
+                const now = Date.now();
+                if (now - player.lastHitTime > player.hitCooldown) {
+                    const difficultySelect = document.getElementById('difficultySelect');
+                    const difficultySetting = DIFFICULTY_SETTINGS[difficultySelect.value];
+                    
+                    player.hp -= difficultySetting.playerDamage * difficulty;
+                    player.lastHitTime = now;
+                    
+                    // Show damage effect
+                    showDamageEffect();
+                    
+                    // Update stats
+                    updateStats();
+                    
+                    // Check if player is dead
+                    if (player.hp <= 0) {
+                        gameOver(false);
+                        return;
+                    }
+                }
+                
+                resetBall();
+                playSound('lose');
+            }
+            
+            // Ball out of bounds - right side (enemy loses HP)
+            if (ball.x > canvas.width) {
+                enemy.hp -= 15;
+                
+                // Increase score
+                score += 10 * difficulty;
+                
+                // Increase difficulty every 20 points
+                if (score > 0 && score % 20 === 0) {
+                    difficulty = Math.min(difficulty, 3);
+                    document.getElementById('difficultyDisplay').textContent = 
+                        difficulty < 0.5 ? 'Beginner' : 
+                        difficulty < 1.5 ? 'Amateur' : 
+                        difficulty < 2 ? 'Apprentice' : 
+                        difficulty < 2.5 ? 'Adept' : 
+                        difficulty < 3 ? 'Expert' : 
+                        'Master';
+                    
+                    // Spawn a power-up when difficulty increases
+                    spawnPowerUp();
+                }
+                
+                resetBall();
+                playSound('score');
+                
+                // Update stats
+                updateStats();
+                
+                // Check if enemy is dead
+                if (enemy.hp <= 0) {
+                    gameOver(true);
+                    return;
+                }
+            }
+            
+            // Update spells
+            updateSpells();
+            
+            // Update power-ups
+            updatePowerUps();
+            
+            // Enemy spell casting
+            const now = Date.now();
+            if (now - enemy.lastSpellTime > enemy.spellInterval / difficulty) {
+                castSpell();
+                enemy.lastSpellTime = now;
+            }
+            
+            // Player MP regeneration
+            if (!player.shieldActive && player.mp < player.maxMp) {
+                player.mp += player.mpRegen;
+                if (player.mp > player.maxMp) player.mp = player.maxMp;
+                updateStats();
+            }
+            
+            // Shield MP drain
+            if (player.shieldActive) { 
+                if (player.shieldActive && player.class !== 'mage') {
+                    player.mp -= player.shieldCost;
+                }
+                if (player.mp <= 0) {
+                    player.mp = 0;
+                    player.shieldActive = false;
+                }
+                updateStats();
+            }
+        }
+        
+        // Update spells - FIXED VERSION
+        function updateSpells() {
+            for (let i = spells.length - 1; i >= 0; i--) {
+                const spell = spells[i];
+                
+                // Move spell
+                spell.x += spell.dx;
+                spell.y += spell.dy;
+                
+                // Check if spell is out of bounds
+                if (spell.x < 0 || spell.x > canvas.width || spell.y < 0 || spell.y > canvas.height) {
+                    spells.splice(i, 1);
+                    continue;
+                }
+                
+                // ======== FIXED SECTION START ======== //
+                // First: Check shield collision (only for enemy spells)
+                if (spell.owner === 'enemy' && player.shieldActive &&
+                    spell.x < player.x + player.width + 10 &&
+                    spell.x > player.x - 10 &&
+                    spell.y + spell.size > player.y - 10 &&
+                    spell.y < player.y + player.height + 10
+                ) {
+                    // Deflect spell back
+                    spell.dx = -spell.dx * 1.5;
+                    spell.dy = (Math.random() - 0.5) * 4;
+                    spell.owner = 'player';
+                    playSound('shield');
+                    continue; // Skip further processing
+                }
+                
+                // Second: Check player collision (only for enemy spells when shield is inactive)
+                if (spell.owner === 'enemy' && 
+                    !player.shieldActive &&
+                    spell.x < player.x + player.width &&
+                    spell.x > player.x &&
+                    spell.y + spell.size > player.y &&
+                    spell.y < player.y + player.height
+                ) {
+                    const now = Date.now();
+                    if (now - player.lastHitTime > player.hitCooldown) {
+                        player.hp -= spell.damage;
+                        player.lastHitTime = now;
+                        
+                        // Apply status effect if spell has one
+                        if (spell.effect) {
+                            applyStatusEffect(spell.effect);
+                        }
+                        
+                        // Show damage effect
+                        showDamageEffect();
+                        
+                        // Update stats
+                        updateStats();
+                        
+                        // Check if player is dead
+                        if (player.hp <= 0) {
+                            gameOver(false);
+                            return;
+                        }
+                    }
+                    
+                    spells.splice(i, 1);
+                    playSound('hit');
+                    continue; // Skip further processing
+                }
+                
+                // Third: Check enemy collision (only for player spells)
+                if (spell.owner === 'player' &&
+                    spell.x + spell.size > enemy.x &&
+                    spell.x < enemy.x + enemy.width &&
+                    spell.y + spell.size > enemy.y &&
+                    spell.y < enemy.y + enemy.height
+                ) {
+                    enemy.hp -= spell.damage;
+                    spells.splice(i, 1);
+                    playSound('hit');
+                    
+                    // Update stats
+                    updateStats();
+                    
+                    // Check if enemy is dead
+                    if (enemy.hp <= 0) {
+                        gameOver(true);
+                        return;
+                    }
+                    continue; // Skip further processing
+                }
+                // ======== FIXED SECTION END ======== //
+            }
+        }
+        
+        // Update power-ups
+        function updatePowerUps() {
+
+            // Add cleanup when collecting new power-up
+            if (this.powerTimer) clearTimeout(this.powerTimer);
+            
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                const powerUp = powerUps[i];
+                
+                // Check collision with player
+                if (
+                    powerUp.x < player.x + player.width &&
+                    powerUp.x + POWERUP_SIZE > player.x &&
+                    powerUp.y + POWERUP_SIZE > player.y &&
+                    powerUp.y < player.y + player.height
+                ) {
+                    applyPowerUp(powerUp);
+                    powerUps.splice(i, 1);
+                    playSound('powerup');
+                }
+                
+                // Remove power-up if expired
+                if (powerUp.lifetime && Date.now() > powerUp.spawnTime + powerUp.lifetime) {
+                    powerUps.splice(i, 1);
+                }
+            }
+        }
+        
+        // Apply power-up effects
+        function applyPowerUp(powerUp) {
+            let powerTimer = null;
+            switch(powerUp.type) {
+                case 'health':
+                    player.hp = Math.min(player.hp + powerUp.value, player.maxHp);
+                    break;
+                case 'mana':
+                    player.mp = Math.min(player.mp + powerUp.value, player.maxMp);
+                    break;
+                case 'power':
+                    if (powerTimer) clearTimeout(powerTimer);
+                    ball.power = powerUp.value;
+                    powerTimer = setTimeout(() => {
+                        if (ball.power === powerUp.value) {
+                            ball.power = 1;
+                        }
+                    }, powerUp.duration);
+                    break;
+            }
+            
+            updateStats();
+        }
+        
+        function applyStatusEffect(effectType) {
+            // Remove existing effects of same type
+            player.statusEffects = player.statusEffects.filter(e => e.type !== effectType);
+            
+            const effect = { 
+                type: effectType,
+                endTime: Date.now() + STATUS[effectType].duration,
+                lastTick: Date.now()
+            };
+            
+            player.statusEffects.push(effect);
+            
+            // Immediate visual feedback
+            switch(effectType) {
+                case 'ICE':
+                    player.dy *= STATUS.ICE.speedMultiplier;
+                    break;
+            }
+        }
+
+        function updateStatusEffects() {
+            const now = Date.now();
+            
+            player.statusEffects = player.statusEffects.filter(effect => {
+                if (now > effect.endTime) {
+                    // Remove expired effect
+                    if (effect.type === 'ICE') {
+                        player.dy /= STATUS.ICE.speedMultiplier;
+                    }
+                    return false;
+                }
+                
+                // Process ongoing effects
+                switch(effect.type) {
+                    case 'FIRE':
+                        if (now - effect.lastTick > STATUS.FIRE.interval) {
+                            player.hp -= STATUS.FIRE.damage;
+                            effect.lastTick = now;
+                            showDamageEffect();
+                        }
+                        break;
+                        
+                    case 'POISON':
+                        if (now - effect.lastTick > STATUS.POISON.interval) {
+                            player.mp = Math.max(0, player.mp - STATUS.POISON.mpDrain);
+                            effect.lastTick = now;
+                        }
+                        break;
+                }
+                
+                return true;
+            });
+        }
+        
+        function showTaunt() {
+            if (Math.random() > 0.3) return; // 30% chance to taunt
+            
+            const tauntDisplay = document.getElementById('tauntDisplay');
+            currentTaunt = TAUNTS[Math.floor(Math.random() * TAUNTS.length)];
+            
+            tauntDisplay.textContent = currentTaunt;
+            tauntDisplay.style.opacity = '1';
+            
+            setTimeout(() => {
+                tauntDisplay.style.opacity = '0';
+            }, 2000);
+        }
+
+        // Cast enemy spell
+        function castSpell() {
+            const spellTypes = [
+                { type: 'FIRE', color: '#ff4500', size: 12, speed: 4, damage: 15 },
+                { type: 'ICE', color: '#a6ceec', size: 15, speed: 4, damage: 20 },
+                { type: 'POISON', color: '#7b19d9', size: 8, speed: 7, damage: 10 },
+                { color: '#ff0000', size: 20, speed: 2, damage: 25 } // Lava
+            ];
+            
+            const type = Math.floor(Math.random() * spellTypes.length);
+            const spell = {
+                x: enemy.x,
+                y: enemy.y + enemy.height / 2 - spellTypes[type].size / 2,
+                size: spellTypes[type].size,
+                dx: -spellTypes[type].speed,
+                dy: (Math.random() - 0.5) * 3,
+                color: spellTypes[type].color,
+                damage: spellTypes[type].damage,
+                owner: 'enemy'
+            };
+            
+            spells.push(spell);
+            playSound('spell');
+            showTaunt();
+            
+            if (spellTypes[type].type) {
+                spell.effect = spellTypes[type].type;
+            }
+        }
+        
+        // Spawn power-up
+        function spawnPowerUp() {
+            const type = Math.floor(Math.random() * powerUpTypes.length);
+            const powerUp = {
+                x: Math.random() * (canvas.width - 150) + 75,
+                y: Math.random() * (canvas.height - 150) + 75,
+                size: POWERUP_SIZE,
+                color: powerUpTypes[type].color,
+                type: powerUpTypes[type].type,
+                value: powerUpTypes[type].value,
+                spawnTime: Date.now()
+            };
+            
+            if (powerUpTypes[type].duration) {
+                powerUp.lifetime = powerUpTypes[type].duration;
+            }
+            
+            powerUps.push(powerUp);
+        }
+        
+        // Draw game elements
+        function draw() {
+            // Draw background
+            drawBackground();
+            
+            // Draw center line
+            drawCenterLine();
+            
+            // Draw paddles
+            drawPaddle(player.x, player.y, player.width, player.height, player.color);
+            drawPaddle(enemy.x, enemy.y, enemy.width, enemy.height, enemy.color);
+            
+            // Draw shield if active
+            if (player.shieldActive) {
+                drawShield();
+            }
+            
+            // Draw ball
+            drawBall();
+            
+            // Draw spells
+            drawSpells();
+            
+            // Draw power-ups
+            drawPowerUps();
+            
+            // Draw pixelated effect
+            drawPixelEffect();
+            
+            // Draw status effect icons
+            ctx.fillStyle = '#ffffff';
+            player.statusEffects.forEach((effect, index) => {
+                ctx.fillStyle = STATUS[effect.type].color;
+                ctx.fillRect(10, 10 + (index * 20), 15, 15);
+            });
+        }
+        
+        // Draw background
+        function drawBackground() {
+            // Dark background
+            ctx.fillStyle = '#0f0f1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Pixel grid pattern
+            ctx.fillStyle = '#1a1a2e';
+            const gridSize = 20;
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                for (let x = 0; x < canvas.width; x += gridSize) {
+                    if ((x + y) % (gridSize * 2) === 0) {
+                        ctx.fillRect(x, y, gridSize, gridSize);
+                    }
+                }
+            }
+        }
+        
+        // Draw center line
+        function drawCenterLine() {
+            ctx.strokeStyle = '#6b4a2d';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
+        // Draw paddle
+        function drawPaddle(x, y, width, height, color) {
+            // Main paddle
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, width, height);
+            
+            // Paddle border
+            ctx.strokeStyle = '#4a2c15';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, width, height);
+            
+            // Paddle details (pixel style)
+            ctx.fillStyle = '#ffffff30';
+            for (let i = 0; i < 3; i++) {
+                ctx.fillRect(x + 2, y + height / 2 - 10 + i * 8, width - 4, 4);
+            }
+        }
+        
+        // Draw ball
+        function drawBall() {
+            // Ball glow effect
+            const gradient = ctx.createRadialGradient(
+                ball.x + ball.size / 2, 
+                ball.y + ball.size / 2, 
+                0,
+                ball.x + ball.size / 2, 
+                ball.y + ball.size / 2, 
+                ball.size * 1.5
+            );
+            
+            if (ball.power > 1) {
+                gradient.addColorStop(0, '#FFD700');
+                gradient.addColorStop(0.7, '#FFA500');
+                gradient.addColorStop(1, '#FF4500');
+            } else {
+                gradient.addColorStop(0, ball.color);
+                gradient.addColorStop(0.7, '#FFA500');
+                gradient.addColorStop(1, '#FF450080');
+            }
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(
+                ball.x + ball.size / 2, 
+                ball.y + ball.size / 2, 
+                ball.size * 1.5, 
+                0, 
+                Math.PI * 2
+            );
+            ctx.fill();
+            
+            // Main ball
+            ctx.fillStyle = ball.color;
+            ctx.beginPath();
+            ctx.arc(
+                ball.x + ball.size / 2, 
+                ball.y + ball.size / 2, 
+                ball.size / 2, 
+                0, 
+                Math.PI * 2
+            );
+            ctx.fill();
+            
+            // Ball border
+            ctx.strokeStyle = '#4a2c15';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(
+                ball.x + ball.size / 2, 
+                ball.y + ball.size / 2, 
+                ball.size / 2, 
+                0, 
+                Math.PI * 2
+            );
+            ctx.stroke();
+            
+            // Ball details (pixel style)
+            if (ball.power > 1) {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(
+                    ball.x + ball.size / 2, 
+                    ball.y + ball.size / 2, 
+                    ball.size / 4, 
+                    0, 
+                    Math.PI * 2
+                );
+                ctx.fill();
+            }
+        }
+        
+        // Draw shield
+        function drawShield() {
+            const shieldRadius = Math.max(player.width, player.height) * 0.8;
+            
+            // Shield glow
+            const gradient = ctx.createRadialGradient(
+                player.x + player.width / 2,
+                player.y + player.height / 2,
+                0,
+                player.x + player.width / 2,
+                player.y + player.height / 2,
+                shieldRadius
+            );
+            gradient.addColorStop(0, '#00BFFF80');
+            gradient.addColorStop(0.7, '#1E90FF80');
+            gradient.addColorStop(1, '#0000FF00');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(
+                player.x + player.width / 2,
+                player.y + player.height / 2,
+                shieldRadius,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+            
+            // Shield outline
+            ctx.strokeStyle = '#1E90FF';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(
+                player.x + player.width / 2,
+                player.y + player.height / 2,
+                shieldRadius,
+                0,
+                Math.PI * 2
+            );
+            ctx.stroke();
+            
+            // Shield pattern
+            ctx.strokeStyle = '#1E90FF40';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(
+                    player.x + player.width / 2,
+                    player.y + player.height / 2
+                );
+                ctx.lineTo(
+                    player.x + player.width / 2 + Math.cos(angle) * shieldRadius,
+                    player.y + player.height / 2 + Math.sin(angle) * shieldRadius
+                );
+                ctx.stroke();
+            }
+        }
+        
+        // Draw spells
+        function drawSpells() {
+            spells.forEach(spell => {
+                // Add lightning trail effect
+                if (spell.color === '#00FFFF') {
+                    // Store last 5 positions for trail
+                    spell.trail.push({x: spell.x, y: spell.y});
+                    if (spell.trail.length > 5) spell.trail.shift();
+                    
+                    // Draw lightning trail
+                    ctx.strokeStyle = '#00FFFF80';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    spell.trail.forEach((pos, index) => {
+                        if (index === 0) ctx.moveTo(pos.x, pos.y);
+                        else ctx.lineTo(pos.x, pos.y);
+                    });
+                    ctx.stroke();
+                }
+                        
+                // Spell glow
+                const gradient = ctx.createRadialGradient(
+                    spell.x + spell.size / 2,
+                    spell.y + spell.size / 2,
+                    0,
+                    spell.x + spell.size / 2,
+                    spell.y + spell.size / 2,
+                    spell.size * 1.5
+                );
+                gradient.addColorStop(0, spell.color + 'FF');
+                gradient.addColorStop(0.7, spell.color + 'A0');
+                gradient.addColorStop(1, spell.color + '00');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(
+                    spell.x + spell.size / 2,
+                    spell.y + spell.size / 2,
+                    spell.size * 1.5,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+                
+                
+                if (spell.owner === 'player' && spell.type === 'arrow') {
+                    // Draw arrow-shaped projectile for archer
+                    const angle = Math.atan2(spell.dy, spell.dx);
+                    const size = spell.size;
+                    const cx = spell.x + size / 2;
+                    const cy = spell.y + size / 2;
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        cx + Math.cos(angle) * size,
+                        cy + Math.sin(angle) * size
+                    );
+                    ctx.lineTo(
+                        cx + Math.cos(angle + Math.PI * 2 / 3) * size * 0.7,
+                        cy + Math.sin(angle + Math.PI * 2 / 3) * size * 0.7
+                    );
+                    ctx.lineTo(
+                        cx + Math.cos(angle - Math.PI * 2 / 3) * size * 0.7,
+                        cy + Math.sin(angle - Math.PI * 2 / 3) * size * 0.7
+                    );
+                    ctx.closePath();
+                    ctx.fill();
+                } else {
+                    // Default circular spell
+                    ctx.fillStyle = spell.color;
+                    ctx.beginPath();
+                    ctx.arc(
+                        spell.x + spell.size / 2,
+                        spell.y + spell.size / 2,
+                        spell.size / 2,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                }
+                
+                // Spell border
+                ctx.strokeStyle = '#4a2c15';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(
+                    spell.x + spell.size / 2,
+                    spell.y + spell.size / 2,
+                    spell.size / 2,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.stroke();
+                
+                
+                // Different appearance for lightning
+                if (spell.color === '#00FFFF') {
+                    ctx.fillStyle = '#00FFFF';
+                    ctx.beginPath();
+                    ctx.arc(
+                        spell.x + spell.size/2,
+                        spell.y + spell.size/2,
+                        spell.size/2,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                    
+                    // Lightning electricity effect
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(spell.x + spell.size/2, spell.y + spell.size/2);
+                    ctx.lineTo(
+                        spell.x + spell.size/2 + (Math.random() - 0.5) * 10,
+                        spell.y + spell.size/2 + (Math.random() - 0.5) * 10
+                    );
+                    ctx.stroke();
+                }
+                
+                // Spell trail
+                if (spell.dx !== 0 || spell.dy !== 0) {
+                    const trailLength = 10;
+                    const angle = Math.atan2(spell.dy, spell.dx);
+                    
+                    ctx.strokeStyle = spell.color + '80';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        spell.x + spell.size / 2,
+                        spell.y + spell.size / 2
+                    );
+                    ctx.lineTo(
+                        spell.x + spell.size / 2 - Math.cos(angle) * trailLength,
+                        spell.y + spell.size / 2 - Math.sin(angle) * trailLength
+                    );
+                    ctx.stroke();
+                }
+                
+            });
+        }
+        
+        // Draw power-ups
+        function drawPowerUps() {
+            powerUps.forEach(powerUp => {
+                // Power-up glow
+                const gradient = ctx.createRadialGradient(
+                    powerUp.x + POWERUP_SIZE / 2,
+                    powerUp.y + POWERUP_SIZE / 2,
+                    0,
+                    powerUp.x + POWERUP_SIZE / 2,
+                    powerUp.y + POWERUP_SIZE / 2,
+                    POWERUP_SIZE * 1.5
+                );
+                gradient.addColorStop(0, powerUp.color + 'FF');
+                gradient.addColorStop(0.7, powerUp.color + 'A0');
+                gradient.addColorStop(1, powerUp.color + '00');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(
+                    powerUp.x + POWERUP_SIZE / 2,
+                    powerUp.y + POWERUP_SIZE / 2,
+                    POWERUP_SIZE * 1.5,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+                
+                // Main power-up
+                ctx.fillStyle = powerUp.color;
+                ctx.beginPath();
+                ctx.arc(
+                    powerUp.x + POWERUP_SIZE / 2,
+                    powerUp.y + POWERUP_SIZE / 2,
+                    POWERUP_SIZE / 2,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+                
+                // Power-up border
+                ctx.strokeStyle = '#4a2c15';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(
+                    powerUp.x + POWERUP_SIZE / 2,
+                    powerUp.y + POWERUP_SIZE / 2,
+                    POWERUP_SIZE / 2,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.stroke();
+                
+                // Power-up symbol
+                ctx.fillStyle = '#FFFFFF';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = 'bold 12px "Press Start 2P"';
+                
+                let symbol = '';
+                switch(powerUp.type) {
+                    case 'health': symbol = 'H'; break;
+                    case 'mana': symbol = 'M'; break;
+                    case 'power': symbol = 'P'; break;
+                }
+                
+                ctx.fillText(
+                    symbol,
+                    powerUp.x + POWERUP_SIZE / 2,
+                    powerUp.y + POWERUP_SIZE / 2
+                );
+                
+                // Pulse animation for power-ups
+                if (powerUp.lifetime) {
+                    const timeLeft = powerUp.spawnTime + powerUp.lifetime - Date.now();
+                    if (timeLeft < 3000) {
+                        const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 200);
+                        ctx.globalAlpha = pulse;
+                        ctx.beginPath();
+                        ctx.arc(
+                            powerUp.x + POWERUP_SIZE / 2,
+                            powerUp.y + POWERUP_SIZE / 2,
+                            POWERUP_SIZE / 2 * (1 + pulse * 0.5),
+                            0,
+                            Math.PI * 2
+                        );
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
+                    }
+                }
+            });
+        }
+        
+        // Draw pixel effect
+        function drawPixelEffect() {
+            const pixelSize = 2;
+            tempCanvas.width = canvas.width / pixelSize;
+            tempCanvas.height = canvas.height / pixelSize;
+            
+            tempCtx.imageSmoothingEnabled = false;
+            tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 
+                          0, 0, canvas.width, canvas.height);
+            ctx.imageSmoothingEnabled = true;
+        }
+        
+        // Draw start screen
+        function drawStartScreen() {
+            ctx.fillStyle = '#0f0f1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Title
+            ctx.fillStyle = '#FFD700';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = 'bold 48px "Press Start 2P"';
+            ctx.fillText('PIXEL PONG RPG', canvas.width / 2, canvas.height / 3);
+            
+            // Subtitle
+            ctx.fillStyle = '#4CAF50';
+            ctx.font = 'bold 16px "Press Start 2P"';
+            ctx.fillText('Defeat the evil wizard!', canvas.width / 2, canvas.height / 2);
+            
+            // Instructions
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = '12px "Press Start 2P"';
+            ctx.fillText('Use mouse to move your paddle', canvas.width / 2, canvas.height * 2 / 3);
+            ctx.fillText('SPACE to activate shield', canvas.width / 2, canvas.height * 2 / 3 + 30);
+        }
+        
+        // Reset ball position
+        function resetBall() {
+            ball.x = canvas.width / 2 - ball.size / 2;
+            ball.y = canvas.height / 2 - ball.size / 2;
+            
+            // Random direction but always towards the player initially
+            const angle = (Math.random() * Math.PI / 2) - Math.PI / 4; // -45 to 45 degrees
+            const speed = INITIAL_BALL_SPEED;
+            
+            ball.dx = -Math.cos(angle) * speed;
+            ball.dy = Math.sin(angle) * speed;
+            
+            // Reset power
+            ball.power = 1;
+        }
+        
+        // Move paddle with mouse
+        function movePaddle(e) {
+            if (!gameRunning) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const root = document.documentElement;
+            
+            const mouseY = e.clientY - rect.top - root.scrollTop - player.height / 2;
+            player.y = Math.max(0, Math.min(canvas.height - player.height, mouseY));
+        }
+        
+        // Handle touch events
+        function handleTouch(e) {
+            if (!gameRunning) return;
+            e.preventDefault();
+            
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            
+            const touchY = touch.clientY - rect.top - player.height / 2;
+            player.y = Math.max(0, Math.min(canvas.height - player.height, touchY));
+        }
+        
+        // Handle key presses
+        function handleKeyDown(e) {
+            if (!gameRunning) return;
+            
+            if (e.key === ' ' && (player.mp > 0 || player.class === 'mage')) {
+                player.shieldActive = true;
+            }
+        }
+        
+        function handleKeyUp(e) {
+            if (e.key === ' ') {
+                player.shieldActive = false;
+            }
+        }
+        
+        // Update stats display
+        function updateStats() {
+            
+            // Player stats
+            const currentHp = Math.max(0, Math.floor(player.hp));
+            document.getElementById('currentHp').textContent = currentHp;
+            
+            // Handle mage's infinite MP
+            if(player.class === 'mage') {
+                document.getElementById('currentMp').textContent = '∞';
+            } else {
+                const currentMp = Math.max(0, Math.floor(player.mp));
+                document.getElementById('currentMp').textContent = currentMp;
+            }
+
+            const playerHpPercent = Math.max(0, player.hp / player.maxHp) * 100;
+            const playerMpPercent = player.class === 'mage' ? 100 : Math.max(0, player.mp / player.maxMp) * 100;
+
+            document.getElementById('playerHpBar').style.width = `${playerHpPercent}%`;
+            document.getElementById('playerMpBar').style.width = `${playerMpPercent}%`;
+            
+            // Attack cooldown
+            const cooldownRemaining = player.attackCooldown - (Date.now() - player.lastAttackTime);
+            const cooldownPercent = Math.max(0, (cooldownRemaining / player.attackCooldown) * 100);
+            
+            document.getElementById('attackCooldownBar').style.width = `${cooldownPercent}%`;
+            document.getElementById('attackCooldown').textContent = cooldownRemaining > 0 ? 
+                `${Math.ceil(cooldownRemaining/1000)}s` : 'Ready';
+            
+            // Enemy stats
+            document.getElementById('enemyHpText').textContent = `${Math.max(0, Math.floor(enemy.hp))}/${enemy.maxHp}`;
+            
+            const enemyHpPercent = Math.max(0, enemy.hp / enemy.maxHp) * 100;
+            document.getElementById('enemyHpBar').style.width = `${enemyHpPercent}%`;
+            
+            // Score
+            document.getElementById('scoreDisplay').textContent = score;
+        }
+        
+        // Show damage effect
+        function showDamageEffect() {
+            const effect = document.getElementById('damageEffect');
+            effect.style.opacity = '1';
+            
+            setTimeout(() => {
+                effect.style.opacity = '0';
+            }, 300);
+        }
+        
+        // Game over
+        function gameOver(victory) {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            document.getElementById('gameControls').classList.add('hidden');
+            const gameOverScreen = document.getElementById('gameOverScreen');
+            const title = document.getElementById('gameOverTitle');
+            const message = document.getElementById('gameOverMessage');
+            const finalScore = document.getElementById('finalScore');
+            const difficultyAchieved = document.getElementById('difficultyAchieved');
+            
+            const difficultySelect = document.getElementById('difficultySelect');
+            const difficultySetting = DIFFICULTY_SETTINGS[difficultySelect.value];
+            
+            gameOverScreen.classList.remove('hidden');
+            
+            if (victory) {
+                title.textContent = 'VICTORY!';
+                title.className = 'text-3xl md:text-5xl text-green-500 pixel-text';
+                message.textContent = 'You have defeated the evil wizard!';
+                playSound('win');
+            } else {
+                title.textContent = 'GAME OVER';
+                title.className = 'text-3xl md:text-5xl text-red-500 pixel-text';
+                message.textContent = 'The wizard has defeated you!';
+                playSound('lose');
+            }
+            
+            finalScore.textContent = `Score: ${score}`;
+            difficultyAchieved.textContent = `Difficulty: ${difficultySetting.name}`;
+        }
+        
+        // Play sound
+        function playSound(type) {
+            // In a real game, you would play actual sound files here
+            // For this demo, we'll just log the sound type
+            console.log(`Playing sound: ${type}`);
+        }
+        
+        // Initialize game when page loads
+        window.onload = init;
+    </script>
+    
+    <div id="tauntDisplay" class="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-red-500 text-xl pixel-text opacity-0 transition-opacity duration-500"></div>
+</body>
+</html>
